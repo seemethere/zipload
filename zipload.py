@@ -1,10 +1,16 @@
 """A simply python module to load zip archives into your python path
 
-How this actually works:
-    1. Unzip archive into a temporary directory
-    2. Add that temporary directory to your Python Path
-    3. Cleanup python path and temporary directory at
-       exit (function / global level)
+zipimport isn't the best module in the world to work with so this module tries
+to overcome its shortcomings by providing easy to use functions that allow you
+to do the things you'd expect zipimport to do in a way that actually makes
+sense.
+
+Note:
+    How this actually works:
+        1. Unzip archive into a temporary directory
+        2. Add that temporary directory to your Python Path
+        3. Cleanup python path and temporary directory at exit
+
 """
 
 import atexit
@@ -19,9 +25,18 @@ import zipfile
 def load(zip_path, path_to_add=""):
     """Load a zip file into your python path at a smaller scale
 
+    Args:
+        zip_path: The local path to the zip
+        path_to_add: Path within the zip to add to the python path
+
+    Note:
+        Usage of this fuction will unzip the provided zip file on each use,
+        use sparingly.
+
     Example:
 
         .. sourcecode:: python
+
             import zipload
 
             with zipload.load("example.zip", "lib/python3.8/site-packages"):
@@ -37,9 +52,18 @@ def load(zip_path, path_to_add=""):
 def global_load(zip_path, path_to_add=""):
     """Load a zip file into your python path at a global level
 
+    Args:
+        zip_path: The local path to the zip
+        path_to_add: Path within the zip to add to the python path
+
+    Note:
+        This function must be used before any libraries you would like to load
+        from the zip
+
     Example:
 
         .. sourcecode:: python
+
             import zipload
             # Must go above libraries you would want to load
             zipload.global_load("example.zip", "lib/python3.8/site-packages")

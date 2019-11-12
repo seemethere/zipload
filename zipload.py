@@ -34,7 +34,7 @@ def load(zip_path, path_to_add=""):
         sys.path.remove(os.path.join(tmp_dir, path_to_add))
 
 
-def gloabl_load(zip_path, path_to_add=""):
+def global_load(zip_path, path_to_add=""):
     """Load a zip file into your python path at a global level
 
     Example:
@@ -42,15 +42,15 @@ def gloabl_load(zip_path, path_to_add=""):
         .. sourcecode:: python
             import zipload
             # Must go above libraries you would want to load
-            zipload.gloabl_load("example.zip", "lib/python3.8/site-packages")
+            zipload.global_load("example.zip", "lib/python3.8/site-packages")
 
             import numpy
     """
     tmp_dir = tempfile.TemporaryDirectory(prefix="zipload-py")
     atexit.register(tmp_dir.cleanup)
     _extract_zip(zip_path, tmp_dir.name, path_to_add)
-    sys.path.append(os.path.join(tmp_dir, path_to_add))
-    atexit.register(os.path.join, tmp_dir, path_to_add)
+    sys.path.append(os.path.join(tmp_dir.name, path_to_add))
+    atexit.register(os.path.join, tmp_dir.name, path_to_add)
 
 
 def _extract_zip(zip_path, tmp_dir, path_to_add=None):

@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "zipload"
+version = "0.1.0"
+description = "A simply python module to load zip archives into your python path"
+authors = ["Eli Uriegas <eliasuriegas@gmail.com>"]
+modules = ["zipload"]
+
+[tool.poetry.dependencies]
+python = "^3.5"
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.2"
+pylint = "^2.4"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"

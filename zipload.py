@@ -10,7 +10,6 @@ How this actually works:
 import atexit
 import contextlib
 import os
-import shutil
 import sys
 import tempfile
 import zipfile
@@ -25,15 +24,14 @@ def load(zip_path, path_to_add=""):
         .. sourcecode:: python
             import zipload
 
-            with zipload.load('example.zip', 'lib/python3.8/site-packages'):
+            with zipload.load("example.zip", "lib/python3.8/site-packages"):
                 import numpy
     """
-    tmp_dir = tempfile.TemporaryDirectory(prefix="zipload-py")
-    _extract_zip(zip_path, tmp_dir, path_to_add)
-    sys.path.append(os.path.join(tmp_dir, path_to_add))
-    yield None
-    shutil.rmtree(tmp_dir)
-    sys.path.remove(os.path.join(tmp_dir, path_to_add))
+    with tempfile.TemporaryDirectory(prefix="zipload-py") as tmp_dir:
+        _extract_zip(zip_path, tmp_dir, path_to_add)
+        sys.path.append(os.path.join(tmp_dir, path_to_add))
+        yield None
+        sys.path.remove(os.path.join(tmp_dir, path_to_add))
 
 
 def gloabl_load(zip_path, path_to_add=""):
@@ -44,19 +42,19 @@ def gloabl_load(zip_path, path_to_add=""):
         .. sourcecode:: python
             import zipload
             # Must go above libraries you would want to load
-            zipload.gloabl_load('example.zip', 'lib/python3.8/site-packages')
+            zipload.gloabl_load("example.zip", "lib/python3.8/site-packages")
 
             import numpy
     """
     tmp_dir = tempfile.TemporaryDirectory(prefix="zipload-py")
-    atexit.register(shutil.rmtree, tmp_dir)
-    _extract_zip(zip_path, tmp_dir, path_to_add)
+    atexit.register(tmp_dir.cleanup)
+    _extract_zip(zip_path, tmp_dir.name, path_to_add)
     sys.path.append(os.path.join(tmp_dir, path_to_add))
-    atexit.register(sys.path.remove, os.path.join(tmp_dir, path_to_add))
+    atexit.register(os.path.join, tmp_dir, path_to_add)
 
 
 def _extract_zip(zip_path, tmp_dir, path_to_add=None):
-    with zipfile.ZipFile(zip_path) as my_zip:
+    with zipfile.ZipFile(zip_path, "r") as my_zip:
         if path_to_add != "":
             for filename in my_zip.namelist():
                 if filename.startswith(path_to_add):

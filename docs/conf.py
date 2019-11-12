@@ -10,8 +10,13 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
+
+import zipload
+
 import os
 import sys
+import pkg_resources
+
 sys.path.insert(0, os.path.abspath('..'))
 
 
@@ -22,7 +27,8 @@ copyright = '2019, Elias Uriegas'
 author = 'Elias Uriegas'
 
 # The full version, including alpha/beta/rc tags
-release = '0.1.0'
+# From https://github.com/sdispater/poetry/issues/273#issuecomment-401983643
+release = pkg_resources.get_distribution(project).version
 
 
 # -- General configuration ---------------------------------------------------

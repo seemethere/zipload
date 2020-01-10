@@ -3,7 +3,9 @@ name = "zipload"
 version = "0.1.0"
 description = "A simply python module to load zip archives into your python path"
 authors = ["Eli Uriegas <eliasuriegas@gmail.com>"]
-modules = ["zipload"]
+packages = [
+    { include = "zipload.py" },
+]
 
 [tool.poetry.dependencies]
 python = "^3.5"

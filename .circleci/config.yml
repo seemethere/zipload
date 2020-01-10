@@ -1,8 +1,15 @@
-version: 2
+version: 2.1
 jobs:
-  test-python3:
+  test:
+    parameters:
+      python_version:
+        type: string
+        default: "3.8"
+      include_lint:
+        type: boolean
+        default: false
     docker:
-      - image: circleci/python:3
+      - image: "circleci/python:<<parameters.python_version>>"
     working_directory: ~/zipload
     steps:
       - checkout
@@ -17,16 +24,22 @@ jobs:
           key: deps-{{ checksum "poetry.lock" }}
           paths:
             - /home/circleci/.cache/pypoetry/virtualenvs
-      - run:
-          name: Lint
-          command: |
-            poetry run pylint *.py
+      - when:
+          condition: <<parameters.include_lint>>
+          steps:
+            - run:
+                name: Lint
+                command: |
+                  poetry run pylint *.py
       - run:
           name: Run tests
           command: |
-            poetry run pytest
+            mkdir -p /tmp/test_results/python<<parameters.python_version>>
+            poetry run pytest --junitxml=/tmp/test_results/python<<parameters.python_version>>/results.xml
+      - store_test_results:
+          path: /tmp/test_results/
   # This is the definition of another job, the one we use to publish the package to PyPI
-  deployment:
+  deploy:
     # Same environment
     docker:
         - image: circleci/python:3
@@ -45,25 +58,30 @@ jobs:
               --no-interaction
 
 workflows:
-  version: 2
-  build:
+  version: 2.1
+  build_test_deploy:
     jobs:
-      - test-python3
-
-  # The deployment workflow publishes the package
-  deployment-workflow:
-    jobs:
-      # Runs build and test, but now just on Git tags (created from a GitHub release)
-      - test-python3:
-          filters:
-            tags:
-              only: /v[0-9]+(\.[0-9]+)*/
-            branches:
-              ignore: /.*/
-      # Runs the deployment job, just with the tags as well
-      - deployment:
+      # Test all versions we'd like to support
+      - test:
+          name: "test_python3.5"
+          python_version: "3.5"
+      - test:
+          name: "test_python3.6"
+          python_version: "3.6"
+      - test:
+          name: "test_python3.7"
+          python_version: "3.7"
+      - test:
+          name: "test_python3.8"
+          python_version: "3.8"
+          include_lint: true
+      # Runs the deployment job, just with a tagged build as well
+      - deploy:
           requires:
-            - test-python3
+            - test_python3.5
+            - test_python3.6
+            - test_python3.7
+            - test_python3.8
           filters:
               tags:
                 only: /v[0-9]+(\.[0-9]+)*/
